@@ -2,3 +2,6 @@
 test/**
 *.vsix
 .gitignore
+
+.github/**
+docs/**

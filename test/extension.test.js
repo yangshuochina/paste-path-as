@@ -27,7 +27,7 @@ function setup({ cancel = false, changed = false, empty = false } = {}) {
     }
   };
   const vscode = {
-    commands: { registerCommand: (id, fn) => { assert.equal(id, 'pastePathAs.paste'); callback = fn; return { dispose() {} }; } },
+    commands: { registerCommand: (id, fn) => { if (id === 'pastePathAs.paste') callback = fn; return { dispose() {} }; } },
     env: { clipboard: { readText: async () => empty ? '' : 'D:\\Work\\a.c' } },
     window: {
       activeTextEditor: editor,
@@ -36,7 +36,7 @@ function setup({ cancel = false, changed = false, empty = false } = {}) {
       showErrorMessage(message) { throw new Error(message); }
     }
   };
-  const sandbox = { require: name => name === 'vscode' ? vscode : { transform }, module: { exports: {} } };
+  const sandbox = { require: name => name === 'vscode' ? vscode : name === './wrap-if-zero' ? require('../wrap-if-zero') : { transform }, module: { exports: {} } };
   vm.runInNewContext(fs.readFileSync(require.resolve('../extension'), 'utf8'), sandbox);
   sandbox.module.exports.activate({ subscriptions: [] });
   return { run: () => callback(), edits, selections };

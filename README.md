@@ -4,7 +4,7 @@
 
 ## 安装与使用
 
-1. 在 VS Code 扩展面板的 `…` 菜单中选择 **Install from VSIX...（从 VSIX 安装）**，打开 `paste-path-as-1.0.0.vsix`。
+1. 在 VS Code 扩展面板的 `…` 菜单中选择 **Install from VSIX...（从 VSIX 安装）**，打开 `paste-path-as-1.0.1.vsix`。
 2. 从 Windows 资源管理器复制路径，在编辑器中放置光标或选择要替换的文本。
 3. 按 **Ctrl+Alt+V**，或者右键选择 **Paste Path As...**，也可在命令面板搜索该命令。
 4. 选择下列格式并按回车。按 Esc 取消，不改动文档。
@@ -47,3 +47,17 @@ Copy a path, focus a text editor, and press **Ctrl+Alt+V** (macOS: **Cmd+Alt+V**
 The command inserts at the cursor or replaces selected text. Multiple cursors receive the same complete clipboard text, and one Undo restores the edit. Quotes and whitespace are preserved. Escaping doubles every backslash; it does not perform complete C or JSON string serialization. Clipboard contents are not modified.
 
 No network access or additional runtime dependencies. Clipboard text is read only when you run the command.
+
+## 用 #if 0 包围代码（1.0.1）
+
+选择 C / C++ 等支持预处理指令的代码，按 **Ctrl+Alt+0**（macOS：**Cmd+Alt+0**），或右键选择 **Wrap Selection with #if 0**。
+
+```c
+#if 0
+selected_code();
+#endif
+```
+
+自动扩展到选中代码所在的完整行，以保证指令独占一行；选区在下一行行首结束时不包含该行。保留代码缩进和文档换行格式。多选区重叠或相邻时合并，分离选区分别包围，一次撤销即可恢复。没有选区时不执行。此命令仅添加包围，不切换或删除已有指令；选区应包含完整、配对的预处理结构。快捷键冲突时可在键盘快捷方式中修改。
+
+Select code and press **Ctrl+Alt+0** to wrap its complete lines with `#if 0` and `#endif`. Overlapping or adjacent selections are merged. Separate selections are wrapped independently. The operation preserves indentation and line endings and can be undone in one step. This adds a wrapper; it does not toggle existing directives.

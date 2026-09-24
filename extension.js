@@ -4,6 +4,7 @@ const vscode = require('vscode');
 const { transform } = require('./transform');
 
 function activate(context) {
+  require('./wrap-if-zero').registerWrapCommand(vscode, context);
   context.subscriptions.push(vscode.commands.registerCommand('pastePathAs.paste', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {

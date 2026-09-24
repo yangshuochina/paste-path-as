@@ -1,20 +1,74 @@
 {
   "name": "paste-path-as",
   "displayName": "Paste Path As",
-  "description": "Paste clipboard text as original Windows paths, escaped backslashes, or forward slashes.",
-  "version": "1.0.0",
+  "description": "Paste paths in your preferred format and wrap selected code with #if 0 / #endif.",
+  "version": "1.0.1",
   "publisher": "yangshuochina",
-  "keywords": ["path", "paste", "clipboard", "windows", "backslash"],
+  "keywords": [
+    "path",
+    "paste",
+    "clipboard",
+    "windows",
+    "backslash"
+  ],
   "license": "MIT",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
   "main": "./extension.js",
-  "extensionKind": ["ui"],
-  "capabilities": { "untrustedWorkspaces": { "supported": true }, "virtualWorkspaces": true },
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
   "contributes": {
-    "commands": [{ "command": "pastePathAs.paste", "title": "Paste Path As...", "enablement": "editorTextFocus && !editorReadonly" }],
-    "keybindings": [{ "command": "pastePathAs.paste", "key": "ctrl+alt+v", "mac": "cmd+alt+v", "when": "editorTextFocus && !editorReadonly" }],
-    "menus": { "editor/context": [{ "command": "pastePathAs.paste", "when": "!editorReadonly", "group": "9_cutcopypaste@4" }] }
+    "commands": [
+      {
+        "command": "pastePathAs.paste",
+        "title": "Paste Path As...",
+        "enablement": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "pastePathAs.wrapIfZero",
+        "title": "Wrap Selection with #if 0",
+        "enablement": "editorTextFocus && editorHasSelection && !editorReadonly"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pastePathAs.paste",
+        "key": "ctrl+alt+v",
+        "mac": "cmd+alt+v",
+        "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "pastePathAs.wrapIfZero",
+        "key": "ctrl+alt+0",
+        "mac": "cmd+alt+0",
+        "when": "editorTextFocus && editorHasSelection && !editorReadonly"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "pastePathAs.paste",
+          "when": "!editorReadonly",
+          "group": "9_cutcopypaste@4"
+        },
+        {
+          "command": "pastePathAs.wrapIfZero",
+          "when": "editorHasSelection && !editorReadonly",
+          "group": "1_modification@10"
+        }
+      ]
+    }
   },
   "scripts": {
     "test": "node --test test/*.test.js",

@@ -74,7 +74,40 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: marketplace-vsix
+      - name: Check whether this version is already on Marketplace
+        id: marketplace
+        env:
+          EXTENSION_ID: yangshuochina.paste-path-as
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const extensionId = process.env.EXTENSION_ID;
+          const version = process.env.VERSION;
+          const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=7.2-preview.1', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json;api-version=7.2-preview.1;excludeUrls=true'
+            },
+            body: JSON.stringify({
+              filters: [{ criteria: [{ filterType: 7, value: extensionId }], pageNumber: 1, pageSize: 1 }],
+              assetTypes: [],
+              flags: 103
+            })
+          });
+          if (!response.ok) throw new Error(`Failed to query Marketplace (${response.status})`);
+          const data = await response.json();
+          const extension = data.results?.[0]?.extensions?.[0];
+          const alreadyPublished = extension?.versions?.some((item) => item.version === version) ?? false;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `already_published=${alreadyPublished}\n`);
+          console.log(alreadyPublished ? `Version ${version} is already published; skipping publish step.` : `Version ${version} is not yet published; continuing.`);
+          NODE
+      - name: Skip publish because this version already exists
+        if: steps.marketplace.outputs.already_published == 'true'
+        run: echo "Version ${{ needs.build.outputs.version }} already exists on Marketplace. No publish action required."
       - name: Check publishing identity configuration
+        if: steps.marketplace.outputs.already_published != 'true'
         env:
           CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -84,9 +117,11 @@ jobs:
             exit 1
           fi
       - uses: azure/login@v2
+        if: steps.marketplace.outputs.already_published != 'true'
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
       - name: Publish the tested package using Microsoft Entra ID
+        if: steps.marketplace.outputs.already_published != 'true'
         run: npx --yes @vscode/vsce@3.9.2 publish --packagePath extension.vsix --azure-credential

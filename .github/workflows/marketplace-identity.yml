@@ -1,0 +1,28 @@
+name: Get Marketplace User ID
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: marketplace
+    steps:
+      - name: Sign in as the publishing application
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Get Marketplace User ID
+        shell: bash
+        run: |
+          identity_id=$(az rest --method get --url 'https://app.vssps.visualstudio.com/_apis/profile/profiles/me' --resource '499b84ac-1321-427f-aa17-267ca6975798' --query id --output tsv)
+          if [[ ! "$identity_id" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
+            echo '::error::No valid Azure DevOps identity ID returned.'
+            exit 1
+          fi
+          echo "Marketplace User ID: $identity_id"
+          echo "Add this User ID as Contributor to publisher yangshuochina: $identity_id" >> "$GITHUB_STEP_SUMMARY"
